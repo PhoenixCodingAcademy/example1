@@ -2,6 +2,7 @@
 let citiesData = [];
 let currentSortColumn = 'state';
 let sortAscending = true;
+let currentFilteredData = []; // New variable to track currently filtered data
 
 // Fetch and process the data
 async function fetchData() {
@@ -56,42 +57,45 @@ function renderTable(data) {
     });
 }
 
-// Sorting function
-function sortData(column) {
-    if (currentSortColumn === column) {
-        sortAscending = !sortAscending;
-    } else {
-        currentSortColumn = column;
-        sortAscending = true;
-    }
+// Update the map with filtered data
+function updateMap(filteredData) {
+    // Clear existing circles
+    d3.select('#map').selectAll('circle').remove();
 
-    citiesData.sort((a, b) => {
-        let valueA = a[column];
-        let valueB = b[column];
+    // Recalculate radius scale with filtered data
+    const populationExtent = d3.extent(filteredData, d => d.population);
+    const radiusScale = d3.scaleSqrt()
+        .domain(populationExtent)
+        .range([4, 20]);
 
-        if (column === 'population') {
-            return sortAscending ? valueA - valueB : valueB - valueA;
-        }
-
-        return sortAscending
-            ? valueA.localeCompare(valueB)
-            : valueB.localeCompare(valueA);
-    });
-
-    renderTable(citiesData);
+    // Add circles for filtered cities
+    d3.select('#map').select('svg')
+        .selectAll('circle')
+        .data(filteredData)
+        .enter()
+        .append('circle')
+        .attr('class', 'city-circle')
+        .attr('cx', d => projection([d.longitude, d.latitude])[0])
+        .attr('cy', d => projection([d.longitude, d.latitude])[1])
+        .attr('r', d => radiusScale(d.population));
 }
 
-// Search function
+// Update the filter function to handle both table and map
 function filterData(searchTerm) {
     const filtered = citiesData.filter(city =>
         city.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
         city.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
         city.population.toString().includes(searchTerm)
     );
+
+    currentFilteredData = filtered; // Store current filtered data
     renderTable(filtered);
+    updateMap(filtered);
 }
 
-// Map initialization and rendering
+// Update map initialization to store projection globally
+let projection; // Declare projection globally
+
 async function initializeMap() {
     const width = document.querySelector('.map-container').clientWidth;
     const height = document.querySelector('.map-container').clientHeight;
@@ -102,8 +106,8 @@ async function initializeMap() {
         .attr('width', width)
         .attr('height', height);
 
-    // Create projection
-    const projection = d3.geoAlbersUsa()
+    // Create projection and store it globally
+    projection = d3.geoAlbersUsa()
         .translate([width / 2, height / 2])
         .scale(width);
 
@@ -120,21 +124,36 @@ async function initializeMap() {
         .attr('fill', '#ddd')
         .attr('stroke', '#fff');
 
-    // Calculate radius scale
-    const populationExtent = d3.extent(citiesData, d => d.population);
-    const radiusScale = d3.scaleSqrt()
-        .domain(populationExtent)
-        .range([4, 20]);
+    // Initial map rendering with all data
+    updateMap(citiesData);
+}
 
-    // Add circles for cities
-    svg.selectAll('circle')
-        .data(citiesData)
-        .enter()
-        .append('circle')
-        .attr('class', 'city-circle')
-        .attr('cx', d => projection([d.longitude, d.latitude])[0])
-        .attr('cy', d => projection([d.longitude, d.latitude])[1])
-        .attr('r', d => radiusScale(d.population));
+// Update the sort function to maintain filtered view
+function sortData(column) {
+    if (currentSortColumn === column) {
+        sortAscending = !sortAscending;
+    } else {
+        currentSortColumn = column;
+        sortAscending = true;
+    }
+
+    const dataToSort = currentFilteredData.length > 0 ? currentFilteredData : citiesData;
+
+    dataToSort.sort((a, b) => {
+        let valueA = a[column];
+        let valueB = b[column];
+
+        if (column === 'population') {
+            return sortAscending ? valueA - valueB : valueB - valueA;
+        }
+
+        return sortAscending
+            ? valueA.localeCompare(valueB)
+            : valueB.localeCompare(valueA);
+    });
+
+    renderTable(dataToSort);
+    updateMap(dataToSort);
 }
 
 // Event listeners
