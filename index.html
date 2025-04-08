@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Cities Population Data</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Include D3.js for map visualization -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Include TopoJSON for US map data -->
+    <script src="https://unpkg.com/topojson@3"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search...">
+        </div>
+
+        <div class="content">
+            <div class="table-container">
+                <table id="citiesTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="state">State</th>
+                            <th data-sort="city">City</th>
+                            <th data-sort="population">Estimated Population (2023)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
