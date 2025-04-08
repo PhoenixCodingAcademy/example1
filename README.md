@@ -36,4 +36,11 @@ To the right of the table, show the data in a proportional symbol map of the USA
 * I see that the Estimated populate column is coming back NaN. So I told cursor. It make the corrections, and I get my site.
 
 # Push Changes
-* Commit message "Init"
+* Commit message "Init", Commit and Push
+* Go to repo at https://github.com/PhoenixCodingAcademy/example1 to see the changes.
+* Settings, Pages, Deploy from a branch, choose "main", Save
+* Refresh the browser
+* Visit site
+* See https://phoenixcodingacademy.github.io/example1/
+
+![](2025-04-07-22-40-52.png)
