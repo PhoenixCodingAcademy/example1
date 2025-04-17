@@ -83,3 +83,8 @@ tr:hover {
 .city-circle:hover {
     fill-opacity: 0.8;
 }
+
+h1 {
+    color: #2c4b8c;  /* semi-dark blue */
+    margin-bottom: 20px;
+}
